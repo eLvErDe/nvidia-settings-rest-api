@@ -1,9 +1,5 @@
 import logging
 import asyncio
-import sys
-import array
-import fcntl
-import termios
 import tempfile
 import re
 from collections import defaultdict
@@ -68,13 +64,13 @@ class NvidiaSettingsService:
                 env={'DISPLAY': self.display_env},
             )
 
-            stdout, stderr = await process.communicate()
+            await process.communicate()
 
             stdout_file.seek(0)
             stdout = stdout_file.read()
 
             if process.returncode != 0:
-                raise NvidiaSettingsServiceException('%s failed with code %d\nStdout was:\n%s\nStderr was:\n%s' % (cmd, process.returncode, stdout, stderr))
+                raise NvidiaSettingsServiceException('%s failed with code %d\nStdout was:\n%s' % (cmd, process.returncode, stdout))
 
         return stdout
 
