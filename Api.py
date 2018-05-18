@@ -1,8 +1,10 @@
 import asyncio
 import logging
+from collections import defaultdict
 import aiohttp.web
 import aiohttp_swagger
 from NvidiaSettingsService import NvidiaSettingsService
+
 
 class Api:
     """ Main API definition """
@@ -76,8 +78,63 @@ class Api:
                     'name': 'GPL-3.0',
                     'url': 'https://www.gnu.org/licenses/gpl-3.0.txt',
                 }
-            }
+            },
+            'paths': defaultdict(lambda: defaultdict(dict)),
         }
+
+        for gpu_index, gpu_attrs in items.items():
+
+            for gpu_attr, attr_conf in gpu_attrs.items():
+
+                relative_url = '/gpu/{index}/attr/{attribute}'.format(
+                    index=gpu_index,
+                    attribute=gpu_attr.lower(),
+                )
+                url = self.route_join(self.config.context_path, relative_url)
+
+                read_only = attr_conf.pop('read-only')
+
+                schema = {
+                    'title': gpu_attr,
+                    'type': 'object',
+                    'required': [ gpu_attr ],
+                    'properties': {
+                        gpu_attr: attr_conf,
+                    },
+                }
+
+                d_swagger['paths'][url]['get'] = {
+                    'produces': [ 'application/json' ],
+                    'tags': ['read-only' if read_only else 'read-write'],
+                    'responses': {
+                        200: {
+                            'description': 'Query succeeded',
+                            'schema': schema,
+                        },
+                    },
+                }
+
+                if read_only:
+                    continue
+
+                d_swagger['paths'][url]['post'] = {
+                    'produces': [ 'application/json' ],
+                    'tags': ['read-write'],
+                    'parameters': [
+                        {
+                            'name': gpu_attr,
+                            'in': 'body',
+                            'required': True,
+                            'schema': schema,
+                        },
+                    ],
+                    'responses': {
+                        200: {
+                            'description': 'New value applied',
+                            'schema': schema,
+                         },
+                     },
+                 }
 
         return d_swagger
 
