@@ -108,8 +108,7 @@ class NvidiaSettingsService:
                 if attribute_type == 'read-only':
                     gpus_attributes[current_index][current_attribute]['read-only'] = True
                 elif attribute_type == 'integer':
-                    gpus_attributes[current_index][current_attribute]['type'] = 'number'
-                    gpus_attributes[current_index][current_attribute]['format'] = None
+                    gpus_attributes[current_index][current_attribute]['type'] = 'integer'
                     gpus_attributes[current_index][current_attribute]['example'] = int(gpus_attributes[current_index][current_attribute]['example'])
                 elif attribute_type == 'bitmask':
                     gpus_attributes[current_index][current_attribute]['type'] = 'string'
@@ -121,8 +120,7 @@ class NvidiaSettingsService:
             if re_match:
                 start, end = re_match.groups()
                 start, end = int(start), int(end)
-                gpus_attributes[current_index][current_attribute]['type'] = 'number'
-                gpus_attributes[current_index][current_attribute]['format'] = None
+                gpus_attributes[current_index][current_attribute]['type'] = 'integer'
                 gpus_attributes[current_index][current_attribute]['minimum'] = start
                 gpus_attributes[current_index][current_attribute]['maximum'] = end
 
