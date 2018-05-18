@@ -87,7 +87,7 @@ class Api:
         and then create corresponding routes and swagger documentation
         """
 
-        items = await self.setup_nvidia_settings_service()
+        items = await self.app['nvidia_settings'].return_available_items()
         d_swagger = self.generate_swagger_dict(items)
 
         swagger_url = self.route_join(self.config.context_path, '/swagger')
