@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
     os.terminal_size((500, 20))
 
-    api = Api(config=config)
+    api = Api(config=config, name=name, version=version)
     aiohttp.web.run_app(
         api.app,
         host=api.config.bind,

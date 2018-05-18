@@ -1,28 +1,77 @@
 import asyncio
 import logging
 import aiohttp.web
+import aiohttp_swagger
 from NvidiaSettingsService import NvidiaSettingsService
 
 class Api:
     """ Main API definition """
 
-    def __init__(self, loop=None, config=None):
+    def __init__(self, config=None, name=None, version=None):
         """ Create the aiohttp application """
 
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.loop = loop if loop is not None else asyncio.get_event_loop()
         self.config = config
+        self.name = name
+        self.version = version
 
-        self.app = aiohttp.web.Application(loop=loop)
+        self.app = aiohttp.web.Application()
         self.app.factory = self
 
-        # NvidiaSettingsService
-        self.app.on_startup.append(self.setup_nvidia_settings_service)
+        loop = asyncio.get_event_loop()
 
-    async def setup_nvidia_settings_service(self, app):
-        app['nvidia_settings'] = NvidiaSettingsService(
+        # Should be done in on_startup callback but:
+        # RuntimeError: Cannot register a resource into frozen router.
+
+        # NvidiaSettingsService
+        asyncio.wait(loop.run_until_complete(self.setup_nvidia_settings_service()))
+
+        # Setup Swagger and routes
+        asyncio.wait(loop.run_until_complete(self.setup_routes_and_swagger()))
+
+    def generate_swagger_dict(self, items):
+        """
+        Generate a dict that will be dumped to swagger.json
+        """
+
+        d_swagger = {
+            'swagger': '2.0',
+            'info': {
+                'title': self.name,
+                'version': self.version,
+            },
+            'contact': {
+                'name': 'Adam Cecile',
+                'email': 'acecile@le-vert.net',
+                'url': 'https://github.com/eLvErDe/nvidia-settings-rest-api',
+            },
+            'license': {
+                'name': 'GPL-3.0',
+                'url': 'https://www.gnu.org/licenses/gpl-3.0.txt',
+            }
+        }
+
+        return d_swagger
+
+    async def setup_routes_and_swagger(self):
+        """
+        Setup NvidaSettings service to get available items
+        and then create corresponding routes and swagger documentation
+        """
+
+        items = await self.setup_nvidia_settings_service()
+        d_swagger = self.generate_swagger_dict(items)
+
+        print('aaa')
+        aiohttp_swagger.setup_swagger(
+            swagger_info=d_swagger,
+        )
+
+    async def setup_nvidia_settings_service(self):
+        """ Create NvidiaSettingsService """
+
+        self.app['nvidia_settings'] = NvidiaSettingsService(
             nvidia_settings_path=self.config.nvidia_settings_path,
             xterm_path=self.config.xterm_path,
             display_env=self.config.display_env,
         )
-        await app['nvidia_settings'].register_all_routes()
