@@ -29,6 +29,25 @@ class Api:
         # Setup Swagger and routes
         asyncio.wait(loop.run_until_complete(self.setup_routes_and_swagger()))
 
+        # Print configured routes
+        self.print_routes()
+
+    def print_routes(self):
+        """ Log all configured routes """
+
+        for route in self.app.router.routes():
+            route_info = route.get_info()
+            if 'formatter' in route_info:
+                url = route_info['formatter']
+            elif 'path' in route_info:
+                url = route_info['path']
+            elif 'prefix' in route_info:
+                url = route_info['prefix']
+            else:
+                url = 'Unknown type of route %s' % route_info
+
+            self.logger.info('Route has been setup %s at %s', route.method, url)
+
     def generate_swagger_dict(self, items):
         """
         Generate a dict that will be dumped to swagger.json
