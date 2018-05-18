@@ -17,7 +17,7 @@ class NvidiaSettingsService:
     Provide GET and POST handlers for commands
     """
 
-    def __init__(self, *, nvidia_settings_path, display_env, xterm_path, loop=None):
+    def __init__(self, *, nvidia_settings_path, display_env, xterm_path):
         """
         Creates a new instance of the service
         :param nvidia_settings_path: Absolute path to nvidia-settings binary
@@ -25,11 +25,12 @@ class NvidiaSettingsService:
         """
 
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.loop = loop if loop is not None else asyncio.get_event_loop()
 
         self.nvidia_settings_path = nvidia_settings_path
         self.xterm_path = xterm_path
         self.display_env = display_env
+
+        self.items = {}
 
     async def execute_process(self, *args):
         """
@@ -124,10 +125,14 @@ class NvidiaSettingsService:
                 gpus_attributes[current_index][current_attribute]['format'] = None
                 gpus_attributes[current_index][current_attribute]['minimum'] = start
                 gpus_attributes[current_index][current_attribute]['maximum'] = end
- 
-        import json
-        self.logger.info(json.dumps(gpus_attributes, indent=4))
 
-    async def register_all_routes(self):
+            re_match = re.match(r"""\s+'{attribute}'\s+is a boolean attribute; valid values are: 1 \(on/true\) and 0 \(off/false\)\.$""".format(attribute=current_attribute), line)
+            if re_match:
+                gpus_attributes[current_index][current_attribute]['type'] = 'boolean'
+                gpus_attributes[current_index][current_attribute]['example'] = bool(int(gpus_attributes[current_index][current_attribute]['example']))
+ 
+        return gpus_attributes
+
+    async def return_available_items(self):
         stdout = await self.execute_process(self.nvidia_settings_path, '--query', 'all')
-        await self.parse_query_all(stdout)
+        return await self.parse_query_all(stdout)
