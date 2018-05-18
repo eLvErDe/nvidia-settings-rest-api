@@ -62,8 +62,8 @@ class Api:
         items = await self.setup_nvidia_settings_service()
         d_swagger = self.generate_swagger_dict(items)
 
-        print('aaa')
         aiohttp_swagger.setup_swagger(
+            self.app,
             swagger_info=d_swagger,
         )
 
