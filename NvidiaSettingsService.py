@@ -131,6 +131,26 @@ class NvidiaSettingsService:
             if re_match:
                 gpus_attributes[current_index][current_attribute]['type'] = 'boolean'
                 gpus_attributes[current_index][current_attribute]['example'] = bool(int(gpus_attributes[current_index][current_attribute]['example']))
+
+            re_match = re.match(r"""\s+Valid values for '{attribute}' are: (.+)\.""".format(attribute=current_attribute), line)
+            if re_match:
+                valid_values = re_match.group(1)
+                valid_values = valid_values.split('and')
+                valid_values = [x.split(',') for x in valid_values]
+                flat_list = [x.strip() for y in valid_values for x in y]
+                try:
+                    flat_list = [int(x) for x in flat_list]
+                    gpus_attributes[current_index][current_attribute]['type'] = 'integer'
+                    gpus_attributes[current_index][current_attribute]['enum'] = flat_list
+                except ValueError:
+                    try:
+                        flat_list = [float(x) for x in flat_list]
+                        gpus_attributes[current_index][current_attribute]['type'] = 'number'
+                        gpus_attributes[current_index][current_attribute]['format'] = 'float'
+                        gpus_attributes[current_index][current_attribute]['enum'] = flat_list
+                    except ValueError:
+                        gpus_attributes[current_index][current_attribute]['type'] = 'string'
+                        gpus_attributes[current_index][current_attribute]['enum'] = flat_list
  
         return gpus_attributes
 
