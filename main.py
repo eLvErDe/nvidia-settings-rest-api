@@ -50,6 +50,7 @@ def cli_args(description='API description'):
     parser.add_argument('-n', '--nvidia-settings-path', type=str, default='/usr/bin/nvidia-settings', help='Absolute path to nvidia-settings binary')
     parser.add_argument('-x', '--xterm-path',           type=str, default='/usr/bin/xterm',           help='Absolute path to xterm binary')
     parser.add_argument('-e', '--display-env',          type=str, default=':0', help='Xorg address to be used as DISPLAY env var')
+    parser.add_argument('-c', '--context-path',         type=str, default='/',  help='Context path of this API', metavar='/api/v1')
 
     parsed = parser.parse_args()
 
@@ -58,6 +59,8 @@ def cli_args(description='API description'):
 
     if not os.path.isfile(parsed.xterm_path) or not os.access(parsed.xterm_path, os.X_OK):
         parser.error('%s does not exist or no permissions or not executable' % parsed.xterm_path)
+
+    parsed.context_path = parsed.context_path.rstrip('/')
 
     return parsed
 

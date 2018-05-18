@@ -32,6 +32,15 @@ class Api:
         # Print configured routes
         self.print_routes()
 
+    @staticmethod
+    def route_join(*args):
+        """ Create relative route url """
+
+        route_url = '/'.join([x.strip('/') for x in args])
+        if not route_url.startswith('/'):
+            route_url = '/' + route_url
+        return route_url
+
     def print_routes(self):
         """ Log all configured routes """
 
@@ -81,10 +90,15 @@ class Api:
         items = await self.setup_nvidia_settings_service()
         d_swagger = self.generate_swagger_dict(items)
 
+        swagger_url = self.route_join(self.config.context_path, '/swagger')
+
         aiohttp_swagger.setup_swagger(
             self.app,
             swagger_info=d_swagger,
+            api_base_url=self.config.context_path,
+            swagger_url=swagger_url,
         )
+        self.app.router.add_route('GET', '/', lambda x: aiohttp.web.HTTPFound(swagger_url))
 
     async def setup_nvidia_settings_service(self):
         """ Create NvidiaSettingsService """
