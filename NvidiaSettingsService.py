@@ -102,7 +102,7 @@ class NvidiaSettingsService:
                 current_attribute = attribute
                 current_index = index
 
-            re_match = re.match(r"""\s+'{attribute}'\s+is an? ([\w-]+) attribute\.$""".format(attribute=current_attribute), line)
+            re_match = re.match(r"""\s+'{attribute}'\s+is an? (.+) attribute\.$""".format(attribute=current_attribute), line)
             if re_match:
                 attribute_type = re_match.group(1)
                 if attribute_type == 'read-only':
@@ -113,6 +113,9 @@ class NvidiaSettingsService:
                 elif attribute_type == 'bitmask':
                     gpus_attributes[current_index][current_attribute]['type'] = 'string'
                     gpus_attributes[current_index][current_attribute]['pattern'] = '0x[0-9a-z]{8}'
+                elif attribute_type == 'packed integer':
+                    gpus_attributes[current_index][current_attribute]['type'] = 'string'
+                    gpus_attributes[current_index][current_attribute]['pattern'] = ','.join(['[0-9]+'] * (gpus_attributes[current_index][current_attribute]['example'].count(',') + 1))
                 else:
                     raise NvidiaSettingsServiceException('nvidia-settings --query all return attribute %s of unhandled type %s' % (current_attribute, attribute_type))
 
