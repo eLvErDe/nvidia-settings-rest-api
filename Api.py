@@ -58,15 +58,15 @@ class Api:
             'info': {
                 'title': self.name,
                 'version': self.version,
-            },
-            'contact': {
-                'name': 'Adam Cecile',
-                'email': 'acecile@le-vert.net',
-                'url': 'https://github.com/eLvErDe/nvidia-settings-rest-api',
-            },
-            'license': {
-                'name': 'GPL-3.0',
-                'url': 'https://www.gnu.org/licenses/gpl-3.0.txt',
+                'contact': {
+                    'name': 'Adam Cecile',
+                    'email': 'acecile@le-vert.net',
+                    'url': 'https://github.com/eLvErDe/nvidia-settings-rest-api',
+                },
+                'license': {
+                    'name': 'GPL-3.0',
+                    'url': 'https://www.gnu.org/licenses/gpl-3.0.txt',
+                }
             }
         }
 
