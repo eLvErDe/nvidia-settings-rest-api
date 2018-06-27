@@ -59,6 +59,7 @@ class NvidiaSettingsService:
                 real_command=' '.join(args),
                 stdout_file=stdout_file.name,
             )
+            self.logger.info('Running: %s', cmd)
 
             process = await asyncio.create_subprocess_shell(
                 cmd=cmd,
