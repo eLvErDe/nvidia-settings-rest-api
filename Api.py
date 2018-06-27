@@ -88,7 +88,7 @@ class Api:
 
                 relative_url = '/gpu/{index}/attr/{attribute}'.format(
                     index=gpu_index,
-                    attribute=gpu_attr.lower(),
+                    attribute=gpu_attr,
                 )
                 url = self.route_join(self.config.context_path, relative_url)
 
