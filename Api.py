@@ -64,7 +64,7 @@ class Api:
         Generate a dict that will be dumped to swagger.json
         """
 
-        d_swagger = {
+        self.d_swagger = {
             'swagger': '2.0',
             'info': {
                 'title': self.name,
@@ -103,7 +103,7 @@ class Api:
                     },
                 }
 
-                d_swagger['paths'][url]['get'] = {
+                self.d_swagger['paths'][url]['get'] = {
                     'produces': [ 'application/json' ],
                     'tags': ['read-only' if read_only else 'read-write'],
                     'responses': {
@@ -117,7 +117,7 @@ class Api:
                 if read_only:
                     continue
 
-                d_swagger['paths'][url]['post'] = {
+                self.d_swagger['paths'][url]['post'] = {
                     'produces': [ 'application/json' ],
                     'tags': ['read-write'],
                     'parameters': [
@@ -136,8 +136,6 @@ class Api:
                      },
                  }
 
-        return d_swagger
-
     async def setup_routes_and_swagger(self):
         """
         Setup NvidaSettings service to get available items
@@ -145,13 +143,13 @@ class Api:
         """
 
         items = await self.app['nvidia_settings'].return_available_items()
-        d_swagger = self.generate_swagger_dict(items)
+        self.generate_swagger_dict(items)
 
         swagger_url = self.route_join(self.config.context_path, '/swagger')
 
         aiohttp_swagger.setup_swagger(
             self.app,
-            swagger_info=d_swagger,
+            swagger_info=self.d_swagger,
             api_base_url=self.config.context_path,
             swagger_url=swagger_url,
         )
