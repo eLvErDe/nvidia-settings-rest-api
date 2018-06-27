@@ -174,3 +174,21 @@ class Api:
             xterm_path=self.config.xterm_path,
             display_env=self.config.display_env,
         )
+
+    async def handler(self, request):
+
+        method = request.method.lower()
+        url = str(request.rel_url)
+        _, part1, gpu_id, part2, attr_id = url.split('/')
+
+        assert part1 == 'gpu' and part2 == 'attr', 'url should match /gpu/<gpu_id>/attr/<attr_id>'
+
+        if method == 'get':
+            service_resp = await self.app['nvidia_settings'].query_attr(int(gpu_id), attr_id)
+            # TODO: return properly typed response according to swagger definition
+            return aiohttp.web.json_response({'value': service_resp[0]})
+
+        elif method == 'post':
+            body = await request.json()
+            # TODO: implement post
+            return aiohttp.web.json_response(body)
