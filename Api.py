@@ -155,6 +155,17 @@ class Api:
         )
         self.app.router.add_route('GET', '/', lambda x: aiohttp.web.HTTPFound(swagger_url))
 
+        for url, params in self.d_swagger['paths'].items():
+            if 'get' in params:
+                resp_schema = params['get']['responses'][200]['schema']['properties']
+                self.logger.info('GET %s: returns %s', url, resp_schema)
+                self.app.router.add_route('GET', url, self.handler)
+            if 'post' in params:
+                body_schema = params['post']['parameters'][0]['schema']['properties']
+                resp_schema = params['get']['responses'][200]['schema']['properties']
+                self.logger.info('POST %s: with body: %s returns %s', url, body_schema, resp_schema)
+                self.app.router.add_route('POST', url, self.handler)
+
     async def setup_nvidia_settings_service(self):
         """ Create NvidiaSettingsService """
 
