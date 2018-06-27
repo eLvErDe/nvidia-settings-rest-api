@@ -158,3 +158,11 @@ class NvidiaSettingsService:
     async def return_available_items(self):
         stdout = await self.execute_process(self.nvidia_settings_path, '--query', 'all')
         return await self.parse_query_all(stdout)
+
+    async def query_attr(self, gpu_id, attr_id):
+
+        assert isinstance(gpu_id, int), 'gpu_id param must be an integer'
+        assert isinstance(attr_id, str) and str, 'attr_id param must be a non-empty string'
+
+        stdout = await self.execute_process(self.nvidia_settings_path, '-tq', '[gpu:%d]/%s' % (gpu_id, attr_id))
+        return [x.strip() for x in str(stdout, 'utf-8').splitlines()]
